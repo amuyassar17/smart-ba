@@ -409,22 +409,35 @@
                 <div class="card-body" style="max-height: 300px; overflow-y: auto;">
                     @forelse($mahasiswa->dokumen as $doc)
                         <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
-                            <div>
-                                <strong>{{ $doc->judul_dokumen }}</strong>
-                                <br>
-                                <small class="text-muted">
-                                    {{ \Carbon\Carbon::parse($doc->tanggal_unggah)->format('d M Y') }} | 
-                                    {{ number_format($doc->ukuran_file / 1024, 2) }} KB
-                                </small>
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-file-earmark-pdf text-danger fs-4 me-2"></i>
+                                    <div>
+                                        <strong>{{ $doc->judul_dokumen }}</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            {{ \Carbon\Carbon::parse($doc->tanggal_unggah)->format('d M Y') }} | 
+                                            {{ number_format($doc->ukuran_file / 1024, 2) }} KB
+                                        </small>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
+                            <div class="d-flex gap-1 align-items-center">
+                                <button class="btn btn-sm btn-outline-primary" 
+                                        onclick="viewPDF('{{ asset('storage/dokumen/' . urlencode($doc->nama_file)) }}', '{{ $doc->judul_dokumen }}')"
+                                        title="Lihat PDF">
+                                    <i class="bi bi-eye"></i>
+                                </button>
                                 <span class="badge {{ $doc->status_baca_dosen == 'Sudah Dilihat' ? 'bg-success' : 'bg-warning' }}">
-                                    {{ $doc->status_baca_dosen }}
+                                    {{ $doc->status_baca_dosen == 'Sudah Dilihat' ? 'Dilihat' : 'Baru' }}
                                 </span>
                             </div>
                         </div>
                     @empty
-                        <p class="text-muted text-center">Belum ada dokumen</p>
+                        <div class="text-center py-3">
+                            <i class="bi bi-file-earmark-pdf text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-2 mb-0 small">Belum ada dokumen</p>
+                        </div>
                     @endforelse
                 </div>
             </div>
@@ -723,5 +736,48 @@
             });
         }
     });
+</script>
+{{-- Modal Preview PDF --}}
+<div class="modal fade" id="pdfViewerModal" tabindex="-1" aria-labelledby="pdfViewerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="pdfViewerModalLabel">
+                    <i class="bi bi-file-earmark-pdf me-2"></i>
+                    <span id="pdfTitle">Preview Dokumen</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0" style="height: 80vh;">
+                <iframe id="pdfViewer" style="width: 100%; height: 100%; border: none;" src=""></iframe>
+            </div>
+            <div class="modal-footer">
+                <a id="pdfDownload" href="" download class="btn btn-success">
+                    <i class="bi bi-download me-2"></i>Download PDF
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@endsection
+
+@section('scripts')
+<script>
+// Function to view PDF in modal
+function viewPDF(pdfUrl, pdfTitle) {
+    document.getElementById('pdfTitle').textContent = pdfTitle;
+    document.getElementById('pdfViewer').src = pdfUrl;
+    document.getElementById('pdfDownload').href = pdfUrl;
+    
+    const modal = new bootstrap.Modal(document.getElementById('pdfViewerModal'));
+    modal.show();
+}
+
+// Clear iframe when modal is hidden to stop loading
+document.getElementById('pdfViewerModal').addEventListener('hidden.bs.modal', function () {
+    document.getElementById('pdfViewer').src = '';
+});
 </script>
 @endsection

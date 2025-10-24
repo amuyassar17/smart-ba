@@ -364,8 +364,12 @@
                         <input type="text" name="judul_dokumen" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">File (PDF, DOC, DOCX - Max 5MB)</label>
-                        <input type="file" name="file_dokumen" class="form-control" accept=".pdf,.doc,.docx" required>
+                        <label class="form-label">File Dokumen (PDF)</label>
+                        <input type="file" name="file_dokumen" class="form-control" accept=".pdf" required>
+                        <div class="form-text">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Hanya file PDF yang diperbolehkan. Maksimal 10MB.
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

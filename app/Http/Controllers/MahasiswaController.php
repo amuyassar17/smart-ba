@@ -157,11 +157,17 @@ class MahasiswaController extends Controller
 
         $request->validate([
             'judul_dokumen' => 'required|string|max:255',
-            'file_dokumen' => 'required|file|mimes:pdf,doc,docx|max:5120',
+            'file_dokumen' => 'required|file|mimes:pdf|max:10240',
+        ], [
+            'file_dokumen.mimes' => 'File harus berformat PDF',
+            'file_dokumen.max' => 'Ukuran file maksimal 10MB',
         ]);
 
         $file = $request->file('file_dokumen');
-        $filename = $mahasiswa->nim . '_' . time() . '.' . $file->getClientOriginalExtension();
+        // Clean NIM: replace spaces with underscores
+        $nimClean = str_replace(' ', '_', $mahasiswa->nim);
+        // Generate filename: nim_timestamp_originalname
+        $filename = $nimClean . '_' . time() . '_' . $file->getClientOriginalName();
         $path = $file->storeAs('dokumen', $filename, 'public');
 
         Dokumen::create([
@@ -169,13 +175,13 @@ class MahasiswaController extends Controller
             'id_dosen' => $mahasiswa->id_dosen_pa,
             'judul_dokumen' => $request->judul_dokumen,
             'nama_file' => $filename,
-            'path_file' => 'storage/' . $path,
-            'tipe_file' => $file->getClientOriginalExtension(),
+            'path_file' => 'dokumen/' . $filename,
+            'tipe_file' => 'pdf',
             'ukuran_file' => $file->getSize(),
             'status_baca_dosen' => 'Belum Dilihat',
         ]);
 
-        return redirect()->route('mahasiswa.dashboard')->with('success', 'Dokumen berhasil diunggah!');
+        return redirect()->route('mahasiswa.dashboard')->with('success', 'Dokumen PDF berhasil diupload!');
     }
 
     public function profil()
