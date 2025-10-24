@@ -134,7 +134,10 @@ class DosenController extends Controller
             }
         ]);
 
-        return view('dosen.detail-mahasiswa', compact('mahasiswa', 'dosen'));
+        // Get all mata kuliah untuk dropdown
+        $mataKuliah = MataKuliah::orderBy('nama_mk', 'asc')->get();
+
+        return view('dosen.detail-mahasiswa', compact('mahasiswa', 'dosen', 'mataKuliah'));
     }
 
     public function approveKRS($nim)

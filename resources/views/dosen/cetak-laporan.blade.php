@@ -24,10 +24,23 @@
         }
         
         .kop-surat {
-            text-align: center;
+            display: flex;
+            align-items: center;
             border-bottom: 3px solid #000;
-            padding-bottom: 10px;
+            padding-bottom: 15px;
             margin-bottom: 20px;
+            gap: 15px;
+        }
+        
+        .kop-surat .logo {
+            flex-shrink: 0;
+            width: 80px;
+            height: 80px;
+        }
+        
+        .kop-surat .kop-text {
+            flex-grow: 1;
+            text-align: center;
         }
         
         .kop-surat h4 {
@@ -91,10 +104,15 @@
 
     {{-- Kop Surat --}}
     <div class="kop-surat">
-        <h4>UNIVERSITAS ISLAM NEGERI ALAUDDIN MAKASSAR</h4>
-        <h4>FAKULTAS SYARIAH DAN HUKUM</h4>
-        <p>Jl. Sultan Alauddin No. 63, Gowa, Sulawesi Selatan</p>
-        <p>Telp: (0411) 424835 | Email: syariah@uin-alauddin.ac.id</p>
+        <div class="logo">
+            <img src="{{ asset('images/logo-uin-palopo.png') }}" alt="Logo UIN Palopo" style="width: 100%; height: 100%; object-fit: contain;">
+        </div>
+        <div class="kop-text">
+            <h4>UNIVERSITAS ISLAM NEGERI KOTA PALOPO</h4>
+            <h4>FAKULTAS SYARIAH DAN HUKUM</h4>
+            <p>Jalan Agatis, Kelurahan Balandai, Kecamatan Bara, Kota Palopo, Sulawesi Selatan</p>
+            <p>Telp: +62821-93362277 | Email: kontak@uinpalopo.ac.id</p>
+        </div>
     </div>
 
     {{-- Judul Laporan --}}
@@ -408,7 +426,7 @@
                 <p class="mb-0">NIM: {{ $mahasiswa->nim }}</p>
             </div>
             <div class="col-6 text-end">
-                <p class="mb-1">Makassar, {{ date('d F Y') }}</p>
+                <p class="mb-1">Palopo, {{ date('d F Y') }}</p>
                 <p class="mb-1 fw-bold">Dosen Pembimbing Akademik</p>
                 <br><br><br>
                 <p class="mb-0 fw-bold">{{ $dosen->nama_dosen }}</p>

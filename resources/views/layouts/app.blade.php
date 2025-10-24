@@ -192,13 +192,15 @@
     @yield('styles')
 </head>
 <body>
-    @include('layouts.navbar')
+    @if(!Request::is('login'))
+        @include('layouts.navbar')
+    @endif
     
     <main>
         @yield('content')
     </main>
     
-    @if(!Request::is('/'))
+    @if(!Request::is('/') && !Request::is('login'))
         @include('layouts.footer')
     @endif
     

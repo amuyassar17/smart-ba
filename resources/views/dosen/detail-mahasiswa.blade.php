@@ -2,6 +2,17 @@
 
 @section('title', 'Detail Mahasiswa')
 
+@section('styles')
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+<style>
+    .select2-container--bootstrap-5 .select2-selection {
+        min-height: 38px;
+    }
+</style>
+@endsection
+
 @section('content')
 <div class="container my-5">
     {{-- Header --}}
@@ -204,8 +215,13 @@
                                     {{-- Initial Row --}}
                                     <div class="row mb-3 nilai-row">
                                         <div class="col-md-5">
-                                            <label class="form-label">Ketik nama mata kuliah...</label>
-                                            <input type="text" name="nama_mk[]" class="form-control" placeholder="Contoh: Algoritma Pemrograman">
+                                            <label class="form-label">Pilih Mata Kuliah</label>
+                                            <select name="nama_mk[]" class="form-select select2-matkul" style="width: 100%;">
+                                                <option value="">-- Pilih Mata Kuliah --</option>
+                                                @foreach($mataKuliah as $mk)
+                                                    <option value="{{ $mk->nama_mk }}">{{ $mk->nama_mk }} ({{ $mk->sks }} SKS)</option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">Nilai</label>
@@ -654,6 +670,13 @@
 
     // Dynamic Nilai Bermasalah Form
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Select2 for existing select elements
+        $('.select2-matkul').select2({
+            theme: 'bootstrap-5',
+            placeholder: '-- Pilih Mata Kuliah --',
+            allowClear: true
+        });
+        
         const container = document.getElementById('nilai-container');
         const btnTambah = document.getElementById('btnTambahNilai');
         
@@ -663,7 +686,12 @@
                 newRow.className = 'row mb-3 nilai-row';
                 newRow.innerHTML = `
                     <div class="col-md-5">
-                        <input type="text" name="nama_mk[]" class="form-control" placeholder="Ketik nama mata kuliah...">
+                        <select name="nama_mk[]" class="form-select select2-matkul" style="width: 100%;">
+                            <option value="">-- Pilih Mata Kuliah --</option>
+                            @foreach($mataKuliah as $mk)
+                                <option value="{{ $mk->nama_mk }}">{{ $mk->nama_mk }} ({{ $mk->sks }} SKS)</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="col-md-3">
                         <select name="nilai_huruf[]" class="form-select">
@@ -684,6 +712,13 @@
                 `;
                 
                 container.appendChild(newRow);
+                
+                // Initialize Select2 for new row
+                $(newRow).find('.select2-matkul').select2({
+                    theme: 'bootstrap-5',
+                    placeholder: '-- Pilih Mata Kuliah --',
+                    allowClear: true
+                });
                 
                 // Add remove listener
                 const removeBtn = newRow.querySelector('.remove-nilai');
@@ -764,6 +799,11 @@
 @endsection
 
 @section('scripts')
+<!-- jQuery (required for Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script>
 // Function to view PDF in modal
 function viewPDF(pdfUrl, pdfTitle) {
