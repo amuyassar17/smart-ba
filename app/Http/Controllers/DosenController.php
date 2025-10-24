@@ -10,6 +10,7 @@ use App\Models\Dokumen;
 use App\Models\NilaiBermasalah;
 use App\Models\MataKuliah;
 use App\Models\EvaluasiSoftskill;
+use App\Models\Pencapaian;
 
 class DosenController extends Controller
 {
@@ -311,5 +312,71 @@ class DosenController extends Controller
         }
 
         return redirect()->back()->with('success', 'Penilaian soft skill berhasil disimpan!');
+    }
+
+    public function updatePencapaian(Request $request, $nim)
+    {
+        $dosen = Auth::guard('dosen')->user();
+        
+        $mahasiswa = Mahasiswa::where('nim', $nim)
+            ->where('id_dosen_pa', $dosen->id_dosen)
+            ->firstOrFail();
+
+        $request->validate([
+            'pencapaian' => 'required|array',
+            'tanggal_selesai' => 'nullable|array',
+            'tanggal_selesai.*' => 'nullable|date',
+        ]);
+
+        $updated = 0;
+
+        foreach ($request->pencapaian as $nama_pencapaian) {
+            $tanggal = $request->tanggal_selesai[$nama_pencapaian] ?? null;
+            
+            Pencapaian::updateOrCreate(
+                [
+                    'nim_mahasiswa' => $mahasiswa->nim,
+                    'nama_pencapaian' => $nama_pencapaian,
+                ],
+                [
+                    'status' => 'Selesai',
+                    'tanggal_selesai' => $tanggal,
+                ]
+            );
+            $updated++;
+        }
+
+        return redirect()->back()->with('success', "Berhasil update {$updated} pencapaian mahasiswa!");
+    }
+
+    public function cetakLaporan($nim)
+    {
+        $dosen = Auth::guard('dosen')->user();
+        
+        $mahasiswa = Mahasiswa::with([
+            'programStudi',
+            'dosenPA',
+            'logbook' => function($q) {
+                $q->orderBy('tanggal_bimbingan', 'desc');
+            },
+            'dokumen' => function($q) {
+                $q->orderBy('tanggal_unggah', 'desc');
+            },
+            'pencapaian',
+            'riwayatAkademik' => function($q) {
+                $q->orderBy('semester', 'asc');
+            },
+            'nilaiBermasalah' => function($q) {
+                $q->where('status_perbaikan', 'Belum');
+            },
+            'evaluasiSoftskill' => function($q) {
+                $q->orderBy('periode_evaluasi', 'desc')->limit(4);
+            }
+        ])
+        ->where('nim', $nim)
+        ->where('id_dosen_pa', $dosen->id_dosen)
+        ->firstOrFail();
+
+        return view('dosen.cetak-laporan', compact('mahasiswa', 'dosen'));
     }
 }

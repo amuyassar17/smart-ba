@@ -10,9 +10,14 @@
             <h3>{{ $mahasiswa->nama_mahasiswa }}</h3>
             <p class="text-muted mb-0">NIM: {{ $mahasiswa->nim }} | Angkatan: {{ $mahasiswa->angkatan }}</p>
         </div>
-        <a href="{{ route('dosen.dashboard') }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Kembali
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('dosen.mahasiswa.cetak-laporan', $mahasiswa->nim) }}" class="btn btn-success" target="_blank">
+                <i class="bi bi-printer"></i> Cetak Laporan
+            </a>
+            <a href="{{ route('dosen.dashboard') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Kembali
+            </a>
+        </div>
     </div>
 
     {{-- Notifikasi --}}
@@ -426,8 +431,11 @@
 
             {{-- Pencapaian --}}
             <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Pencapaian</h5>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalUpdatePencapaian">
+                        <i class="bi bi-pencil"></i> Update
+                    </button>
                 </div>
                 <div class="card-body">
                     @php
@@ -496,6 +504,61 @@
                     @endforelse
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal Update Pencapaian --}}
+<div class="modal fade" id="modalUpdatePencapaian" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-flag-fill"></i> Update Kemajuan Studi
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('dosen.mahasiswa.pencapaian.update', $mahasiswa->nim) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <p class="text-muted mb-3">Centang pencapaian yang sudah selesai dan isi tanggal selesainya.</p>
+                    
+                    @php
+                        $daftarPencapaian = [
+                            'Seminar Proposal', 
+                            'Ujian Komperehensif',
+                            'Seminar Hasil', 
+                            'Ujian Skripsi (Yudisium)', 
+                            'Publikasi Jurnal'
+                        ];
+                        $pencapaianMap = $mahasiswa->pencapaian->keyBy('nama_pencapaian');
+                    @endphp
+
+                    @foreach($daftarPencapaian as $item)
+                        @php
+                            $completed = isset($pencapaianMap[$item]) && $pencapaianMap[$item]->status == 'Selesai';
+                            $tanggal = $completed ? $pencapaianMap[$item]->tanggal_selesai : '';
+                        @endphp
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="pencapaian[]" value="{{ $item }}" 
+                                       id="pencapaian{{ $loop->index }}" {{ $completed ? 'checked' : '' }}>
+                                <label class="form-check-label fw-bold" for="pencapaian{{ $loop->index }}">
+                                    {{ $item }}
+                                </label>
+                            </div>
+                            <input type="date" name="tanggal_selesai[{{ $item }}]" class="form-control mt-2" 
+                                   placeholder="Tanggal selesai" value="{{ $tanggal }}">
+                        </div>
+                    @endforeach
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save"></i> Simpan Kemajuan
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

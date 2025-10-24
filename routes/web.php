@@ -39,4 +39,6 @@ Route::middleware('dosen')->prefix('dosen')->name('dosen.')->group(function () {
     Route::post('/mahasiswa/{nim}/logbook', [DosenController::class, 'storeLogbook'])->name('mahasiswa.logbook.store');
     Route::post('/mahasiswa/{nim}/nilai-bermasalah', [DosenController::class, 'storeNilaiBermasalah'])->name('mahasiswa.nilai-bermasalah.store');
     Route::post('/mahasiswa/{nim}/evaluasi-softskill', [DosenController::class, 'storeEvaluasiSoftskill'])->name('mahasiswa.evaluasi-softskill.store');
+    Route::post('/mahasiswa/{nim}/pencapaian', [DosenController::class, 'updatePencapaian'])->name('mahasiswa.pencapaian.update');
+    Route::get('/mahasiswa/{nim}/cetak-laporan', [DosenController::class, 'cetakLaporan'])->name('mahasiswa.cetak-laporan');
 });
