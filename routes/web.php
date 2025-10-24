@@ -32,6 +32,7 @@ Route::middleware('mahasiswa')->prefix('mahasiswa')->name('mahasiswa.')->group(f
 // Dosen Routes (Protected)
 Route::middleware('dosen')->prefix('dosen')->name('dosen.')->group(function () {
     Route::get('/dashboard', [DosenController::class, 'dashboard'])->name('dashboard');
+    Route::get('/profil', [DosenController::class, 'profil'])->name('profil');
     Route::get('/mahasiswa/{nim}', [DosenController::class, 'detailMahasiswa'])->name('mahasiswa.detail');
     Route::post('/mahasiswa/{nim}/approve-krs', [DosenController::class, 'approveKRS'])->name('mahasiswa.approve-krs');
     Route::post('/mahasiswa/{nim}/reject-krs', [DosenController::class, 'rejectKRS'])->name('mahasiswa.reject-krs');

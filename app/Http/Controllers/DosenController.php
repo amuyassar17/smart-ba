@@ -14,6 +14,46 @@ use App\Models\Pencapaian;
 
 class DosenController extends Controller
 {
+    public function profil()
+    {
+        $dosen = Auth::guard('dosen')->user();
+        
+        // Load mahasiswa bimbingan dengan statistik
+        $mahasiswaBimbingan = Mahasiswa::where('id_dosen_pa', $dosen->id_dosen)
+            ->with('programStudi')
+            ->get();
+        
+        // Statistik
+        $totalMahasiswa = $mahasiswaBimbingan->count();
+        $mahasiswaAktif = $mahasiswaBimbingan->where('status_semester', 'A')->count();
+        $rataRataIPK = $mahasiswaBimbingan->avg('ipk');
+        
+        // Evaluasi dari mahasiswa
+        $evaluasiDosen = \App\Models\EvaluasiDosen::where('id_dosen', $dosen->id_dosen)
+            ->with('mahasiswa:nim,nama_mahasiswa')
+            ->orderBy('periode_evaluasi', 'desc')
+            ->get();
+        
+        // Hitung rata-rata evaluasi per kategori
+        $rataKomunikasi = $evaluasiDosen->avg('skor_komunikasi');
+        $rataMembantu = $evaluasiDosen->avg('skor_membantu');
+        $rataSolusi = $evaluasiDosen->avg('skor_solusi');
+        $rataKeseluruhan = ($rataKomunikasi + $rataMembantu + $rataSolusi) / 3;
+        
+        return view('dosen.profil', compact(
+            'dosen', 
+            'mahasiswaBimbingan',
+            'totalMahasiswa',
+            'mahasiswaAktif',
+            'rataRataIPK',
+            'evaluasiDosen',
+            'rataKomunikasi',
+            'rataMembantu',
+            'rataSolusi',
+            'rataKeseluruhan'
+        ));
+    }
+
     public function dashboard(Request $request)
     {
         $dosen = Auth::guard('dosen')->user();

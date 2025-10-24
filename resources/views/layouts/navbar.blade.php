@@ -93,6 +93,11 @@
                             <i class="bi bi-speedometer2 me-1"></i>Dashboard
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3 py-2 rounded-pill" href="{{ route('dosen.profil') }}">
+                            <i class="bi bi-person-badge me-1"></i>Profil
+                        </a>
+                    </li>
                     <li class="nav-item ms-lg-2 dropdown">
                         <a class="nav-link dropdown-toggle px-3 py-2 rounded-pill d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
                             <div class="bg-white rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
@@ -105,6 +110,12 @@
                                 <small class="text-muted">Dosen PA</small>
                                 <div class="fw-bold text-truncate" style="max-width: 200px;">{{ Auth::guard('dosen')->user()->nama_dosen }}</div>
                                 <small class="text-muted">{{ Auth::guard('dosen')->user()->nidn_dosen }}</small>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('dosen.profil') }}">
+                                    <i class="bi bi-person-badge me-2"></i>Profil Saya
+                                </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
