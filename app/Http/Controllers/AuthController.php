@@ -35,8 +35,26 @@ class AuthController extends Controller
         ];
 
         if ($request->role === 'mahasiswa') {
-            $credentials['nim'] = $request->username;
+            // Format NIM: hapus spasi dari input, lalu format ke XX XXXX XXXX
+            $nim = str_replace(' ', '', $request->username); // Hapus semua spasi
             
+            // Format NIM menjadi XX XXXX XXXX (dengan spasi)
+            // Contoh: 1803010015 -> 18 0301 0015
+            if (strlen($nim) >= 10 && ctype_digit($nim)) {
+                $nim_formatted = substr($nim, 0, 2) . ' ' . substr($nim, 2, 4) . ' ' . substr($nim, 6);
+            } else {
+                $nim_formatted = $request->username; // Gunakan input asli jika format tidak sesuai
+            }
+            
+            // Coba login dengan format spasi terlebih dahulu
+            $credentials['nim'] = $nim_formatted;
+            if (Auth::guard('mahasiswa')->attempt($credentials, $request->remember)) {
+                $request->session()->regenerate();
+                return redirect()->intended(route('mahasiswa.dashboard'));
+            }
+            
+            // Jika gagal, coba dengan input asli (tanpa format)
+            $credentials['nim'] = $request->username;
             if (Auth::guard('mahasiswa')->attempt($credentials, $request->remember)) {
                 $request->session()->regenerate();
                 return redirect()->intended(route('mahasiswa.dashboard'));

@@ -35,7 +35,8 @@
                         
                         <div class="mb-3">
                             <label for="username" class="form-label">Username (NIM/NIDN)</label>
-                            <input type="text" class="form-control" id="username" name="username" required autofocus>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Contoh: 1803010015 (tanpa spasi)" required autofocus>
+                            <small class="text-muted">Mahasiswa: masukkan NIM tanpa spasi. Dosen: masukkan NIDN</small>
                         </div>
                         
                         <div class="mb-3">
