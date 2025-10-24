@@ -382,4 +382,19 @@ class DosenController extends Controller
 
         return view('dosen.cetak-laporan', compact('mahasiswa', 'dosen'));
     }
+
+    public function markDokumenAsRead($id)
+    {
+        $dosen = Auth::guard('dosen')->user();
+        
+        $dokumen = Dokumen::where('id_dokumen', $id)
+            ->where('id_dosen', $dosen->id_dosen)
+            ->firstOrFail();
+
+        $dokumen->update([
+            'status_baca_dosen' => 'Sudah Dilihat'
+        ]);
+
+        return response()->json(['success' => true]);
+    }
 }

@@ -440,11 +440,12 @@
                             </div>
                             <div class="d-flex gap-1 align-items-center">
                                 <button class="btn btn-sm btn-outline-primary" 
-                                        onclick="viewPDF('{{ asset('storage/dokumen/' . urlencode($doc->nama_file)) }}', '{{ $doc->judul_dokumen }}')"
+                                        onclick="viewPDF('{{ asset('storage/dokumen/' . urlencode($doc->nama_file)) }}', '{{ $doc->judul_dokumen }}', {{ $doc->id_dokumen }})"
                                         title="Lihat PDF">
                                     <i class="bi bi-eye"></i>
                                 </button>
-                                <span class="badge {{ $doc->status_baca_dosen == 'Sudah Dilihat' ? 'bg-success' : 'bg-warning' }}">
+                                <span class="badge {{ $doc->status_baca_dosen == 'Sudah Dilihat' ? 'bg-success' : 'bg-warning' }}" 
+                                      data-dokumen-id="{{ $doc->id_dokumen }}">
                                     {{ $doc->status_baca_dosen == 'Sudah Dilihat' ? 'Dilihat' : 'Baru' }}
                                 </span>
                             </div>
@@ -806,10 +807,42 @@
 
 <script>
 // Function to view PDF in modal
-function viewPDF(pdfUrl, pdfTitle) {
+function viewPDF(pdfUrl, pdfTitle, dokumenId) {
     document.getElementById('pdfTitle').textContent = pdfTitle;
     document.getElementById('pdfViewer').src = pdfUrl;
     document.getElementById('pdfDownload').href = pdfUrl;
+    
+    // Mark dokumen as read via AJAX
+    if (dokumenId) {
+        fetch(`/dosen/dokumen/${dokumenId}/mark-as-read`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Update badge status in the list
+                const badge = document.querySelector(`[data-dokumen-id="${dokumenId}"]`);
+                if (badge) {
+                    badge.textContent = 'Dilihat';
+                    badge.classList.remove('bg-warning');
+                    badge.classList.add('bg-success');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error marking dokumen as read:', error);
+            // Silently fail - don't block PDF viewing
+        });
+    }
     
     const modal = new bootstrap.Modal(document.getElementById('pdfViewerModal'));
     modal.show();
