@@ -22,9 +22,23 @@
             <p class="text-muted mb-0">NIM: {{ $mahasiswa->nim }} | Angkatan: {{ $mahasiswa->angkatan }}</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('dosen.mahasiswa.cetak-laporan', $mahasiswa->nim) }}" class="btn btn-success" target="_blank">
-                <i class="bi bi-printer"></i> Cetak Laporan
-            </a>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-printer"></i> Cetak Laporan
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item" href="{{ route('dosen.mahasiswa.cetak-laporan', $mahasiswa->nim) }}" target="_blank">
+                            <i class="bi bi-file-earmark-text"></i> Laporan Aktif (Nilai Belum Dikirim)
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('dosen.mahasiswa.cetak-laporan', ['nim' => $mahasiswa->nim, 'semua' => 'true']) }}" target="_blank">
+                            <i class="bi bi-file-earmark-text-fill"></i> Laporan Lengkap (Semua History)
+                        </a>
+                    </li>
+                </ul>
+            </div>
             <a href="{{ route('dosen.dashboard') }}" class="btn btn-secondary">
                 <i class="bi bi-arrow-left"></i> Kembali
             </a>
@@ -399,6 +413,51 @@
                                     <p class="text-muted">Tidak ada nilai bermasalah yang perlu ditindaklanjuti.</p>
                                 </div>
                             @endif
+
+                            {{-- History Nilai Bermasalah --}}
+                            @php
+                                $historyNilai = \App\Models\NilaiBermasalah::where('nim_mahasiswa', $mahasiswa->nim)
+                                    ->where('dikirim_ke_logbook', true)
+                                    ->orderBy('tanggal_lapor', 'desc')
+                                    ->get();
+                            @endphp
+
+                            @if($historyNilai->count() > 0)
+                                <div class="card border-secondary mt-4">
+                                    <div class="card-header bg-secondary text-white">
+                                        <h6 class="mb-0"><i class="bi bi-clock-history"></i> History Nilai Bermasalah ({{ $historyNilai->count() }})</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted mb-3">Daftar nilai bermasalah yang sudah dikirim ke logbook.</p>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>No</th>
+                                                        <th>Mata Kuliah</th>
+                                                        <th>Nilai</th>
+                                                        <th>Semester</th>
+                                                        <th>Tanggal Lapor</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach($historyNilai as $index => $nilai)
+                                                        <tr>
+                                                            <td>{{ $index + 1 }}</td>
+                                                            <td>{{ $nilai->nama_mk }}</td>
+                                                            <td><span class="badge bg-danger">{{ $nilai->nilai_huruf }}</span></td>
+                                                            <td>{{ $nilai->semester_diambil }}</td>
+                                                            <td>{{ \Carbon\Carbon::parse($nilai->tanggal_lapor)->format('d/m/Y H:i') }}</td>
+                                                            <td><span class="badge bg-secondary">Sudah Dikirim</span></td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -769,6 +828,53 @@
                 // Open modal
                 const modal = new bootstrap.Modal(document.getElementById('modalTambahLogbook'));
                 modal.show();
+            });
+        }
+
+        // Override form submit untuk modal tambah logbook
+        const formLogbook = document.querySelector('#modalTambahLogbook form');
+        if (formLogbook) {
+            formLogbook.addEventListener('submit', function(e) {
+                // Check if this is peringatan akademik submission
+                const topikValue = document.querySelector('#modalTambahLogbook input[name="topik_bimbingan"]').value;
+                
+                if (topikValue === 'Peringatan Nilai Akademik') {
+                    e.preventDefault();
+                    
+                    // Submit form menggunakan fetch
+                    const formData = new FormData(this);
+                    
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Mark nilai bermasalah as sent
+                            return fetch('{{ route("dosen.mahasiswa.nilai-bermasalah.mark-as-sent", $mahasiswa->nim) }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                                }
+                            });
+                        } else {
+                            throw new Error('Gagal menyimpan logbook');
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Reload page to show updated data
+                        window.location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Terjadi kesalahan. Silakan coba lagi.');
+                    });
+                }
             });
         }
     });

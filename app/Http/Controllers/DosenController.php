@@ -170,7 +170,7 @@ class DosenController extends Controller
                 $q->orderBy('semester', 'asc');
             },
             'nilaiBermasalah' => function($q) {
-                $q->where('status_perbaikan', 'Belum');
+                $q->where('dikirim_ke_logbook', false);
             }
         ]);
 
@@ -392,9 +392,10 @@ class DosenController extends Controller
         return redirect()->back()->with('success', "Berhasil update {$updated} pencapaian mahasiswa!");
     }
 
-    public function cetakLaporan($nim)
+    public function cetakLaporan(Request $request, $nim)
     {
         $dosen = Auth::guard('dosen')->user();
+        $tampilkanSemua = $request->query('semua') === 'true';
         
         $mahasiswa = Mahasiswa::with([
             'programStudi',
@@ -409,8 +410,11 @@ class DosenController extends Controller
             'riwayatAkademik' => function($q) {
                 $q->orderBy('semester', 'asc');
             },
-            'nilaiBermasalah' => function($q) {
-                $q->where('status_perbaikan', 'Belum');
+            'nilaiBermasalah' => function($q) use ($tampilkanSemua) {
+                if (!$tampilkanSemua) {
+                    $q->where('dikirim_ke_logbook', false);
+                }
+                $q->orderBy('tanggal_lapor', 'desc');
             },
             'evaluasiSoftskill' => function($q) {
                 $q->orderBy('periode_evaluasi', 'desc')->limit(4);
@@ -420,7 +424,7 @@ class DosenController extends Controller
         ->where('id_dosen_pa', $dosen->id_dosen)
         ->firstOrFail();
 
-        return view('dosen.cetak-laporan', compact('mahasiswa', 'dosen'));
+        return view('dosen.cetak-laporan', compact('mahasiswa', 'dosen', 'tampilkanSemua'));
     }
 
     public function markDokumenAsRead($id)
@@ -436,5 +440,24 @@ class DosenController extends Controller
         ]);
 
         return response()->json(['success' => true]);
+    }
+
+    public function markNilaiBermasalahAsSent($nim)
+    {
+        $dosen = Auth::guard('dosen')->user();
+        
+        $mahasiswa = Mahasiswa::where('nim', $nim)
+            ->where('id_dosen_pa', $dosen->id_dosen)
+            ->firstOrFail();
+
+        // Mark all current nilai bermasalah yang belum dikirim sebagai sudah dikirim
+        $updated = NilaiBermasalah::where('nim_mahasiswa', $mahasiswa->nim)
+            ->where('dikirim_ke_logbook', false)
+            ->update(['dikirim_ke_logbook' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Berhasil menandai {$updated} nilai sebagai sudah dikirim ke logbook"
+        ]);
     }
 }

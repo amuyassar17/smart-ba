@@ -118,6 +118,11 @@
     {{-- Judul Laporan --}}
     <div class="text-center mb-4">
         <h5 class="fw-bold">LAPORAN BIMBINGAN AKADEMIK</h5>
+        @if(isset($tampilkanSemua) && $tampilkanSemua)
+            <p class="mb-1"><span class="badge bg-info">LAPORAN LENGKAP (SEMUA HISTORY)</span></p>
+        @else
+            <p class="mb-1"><span class="badge bg-success">LAPORAN AKTIF (NILAI BELUM DIKIRIM)</span></p>
+        @endif
         <p class="mb-1">Periode: {{ date('Y') }}</p>
         <p>Tanggal Cetak: {{ date('d/m/Y H:i') }} WIB</p>
     </div>
@@ -273,13 +278,19 @@
     {{-- Nilai Bermasalah --}}
     @if($mahasiswa->nilaiBermasalah->count() > 0)
         <div class="section-title">V. NILAI BERMASALAH (C/D/E)</div>
+        @if(isset($tampilkanSemua) && $tampilkanSemua)
+            <p><strong>Catatan:</strong> Laporan ini menampilkan <u>semua history</u> nilai bermasalah (termasuk yang sudah dikirim ke logbook).</p>
+        @else
+            <p><strong>Catatan:</strong> Laporan ini hanya menampilkan nilai bermasalah yang <u>belum dikirim</u> ke logbook (masih aktif).</p>
+        @endif
         <table class="table table-bordered table-sm">
             <thead class="table-light">
                 <tr>
                     <th width="5%">No</th>
-                    <th width="50%">Mata Kuliah</th>
-                    <th width="15%">Nilai</th>
-                    <th width="15%">Semester</th>
+                    <th width="40%">Mata Kuliah</th>
+                    <th width="10%">Nilai</th>
+                    <th width="10%">Semester</th>
+                    <th width="20%">Tanggal Lapor</th>
                     <th width="15%">Status</th>
                 </tr>
             </thead>
@@ -290,12 +301,21 @@
                         <td>{{ $nilai->nama_mk }}</td>
                         <td class="text-center"><strong>{{ $nilai->nilai_huruf }}</strong></td>
                         <td class="text-center">{{ $nilai->semester_diambil }}</td>
-                        <td class="text-center">{{ $nilai->status_perbaikan }}</td>
+                        <td class="text-center">{{ \Carbon\Carbon::parse($nilai->tanggal_lapor)->format('d/m/Y H:i') }}</td>
+                        <td class="text-center">
+                            @if($nilai->dikirim_ke_logbook)
+                                <span class="badge bg-secondary">Sudah Dikirim</span>
+                            @else
+                                <span class="badge bg-warning text-dark">Belum Dikirim</span>
+                            @endif
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
-        <p class="text-danger"><em>*Perlu tindak lanjut untuk perbaikan nilai</em></p>
+        @if(!isset($tampilkanSemua) || !$tampilkanSemua)
+            <p class="text-danger"><em>*Perlu tindak lanjut untuk perbaikan nilai</em></p>
+        @endif
     @endif
 
     {{-- Riwayat Bimbingan --}}

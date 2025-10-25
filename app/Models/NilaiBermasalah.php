@@ -16,6 +16,7 @@ class NilaiBermasalah extends Model
         'nilai_huruf',
         'semester_diambil',
         'status_perbaikan',
+        'dikirim_ke_logbook',
     ];
 
     protected function casts(): array
