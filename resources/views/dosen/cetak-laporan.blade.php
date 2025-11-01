@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Bimbingan Akademik - {{ $mahasiswa->nama_mahasiswa }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+
         @media print {
             .no-print {
                 display: none !important;
@@ -17,12 +19,12 @@
                 font-size: 12pt;
             }
         }
-        
+
         body {
             background: white;
             padding: 20px;
         }
-        
+
         .kop-surat {
             display: flex;
             align-items: center;
@@ -31,43 +33,43 @@
             margin-bottom: 20px;
             gap: 15px;
         }
-        
+
         .kop-surat .logo {
             flex-shrink: 0;
             width: 80px;
             height: 80px;
         }
-        
+
         .kop-surat .kop-text {
             flex-grow: 1;
             text-align: center;
         }
-        
+
         .kop-surat h4 {
             margin: 5px 0;
             font-weight: bold;
         }
-        
+
         .kop-surat p {
             margin: 2px 0;
             font-size: 11pt;
         }
-        
+
         table {
             width: 100%;
             margin-bottom: 15px;
         }
-        
+
         .table-bordered {
             border: 1px solid #000 !important;
         }
-        
+
         .table-bordered th,
         .table-bordered td {
             border: 1px solid #000 !important;
             padding: 8px;
         }
-        
+
         .section-title {
             background: #f0f0f0;
             padding: 8px;
@@ -76,15 +78,15 @@
             font-weight: bold;
             border-left: 4px solid #0d6efd;
         }
-        
+
         .ttd-section {
             margin-top: 40px;
         }
-        
+
         .info-table td {
             padding: 5px 10px;
         }
-        
+
         .info-table td:first-child {
             width: 30%;
             font-weight: bold;
@@ -232,19 +234,19 @@
     <div class="section-title">IV. PENCAPAIAN KEMAJUAN STUDI</div>
     @php
         $daftarPencapaian = [
-            'Seminar Proposal', 
+            'Seminar Proposal',
             'Ujian Komperehensif',
-            'Seminar Hasil', 
-            'Ujian Skripsi (Yudisium)', 
+            'Seminar Hasil',
+            'Ujian Skripsi (Yudisium)',
             'Publikasi Jurnal'
         ];
         $pencapaianMap = $mahasiswa->pencapaian->keyBy('nama_pencapaian');
         $selesai = $pencapaianMap->where('status', 'Selesai')->count();
         $progress = count($daftarPencapaian) > 0 ? round(($selesai / count($daftarPencapaian)) * 100) : 0;
     @endphp
-    
+
     <p><strong>Progress Keseluruhan: {{ $progress }}% ({{ $selesai }}/{{ count($daftarPencapaian) }} selesai)</strong></p>
-    
+
     <table class="table table-bordered table-sm">
         <thead class="table-light">
             <tr>
@@ -396,10 +398,10 @@
             $totalBimbingan = $mahasiswa->logbook->count();
             $progressPencapaian = $progress;
         @endphp
-        
+
         <p><strong>Kesimpulan:</strong></p>
         <ul>
-            <li>Mahasiswa memiliki IPK {{ number_format($ipk, 2) }} 
+            <li>Mahasiswa memiliki IPK {{ number_format($ipk, 2) }}
                 @if($ipk >= 3.5)
                     dengan predikat <strong>Sangat Memuaskan</strong>
                 @elseif($ipk >= 3.0)
@@ -416,7 +418,7 @@
                 <li class="text-danger">Terdapat <strong>{{ $mahasiswa->nilaiBermasalah->count() }} nilai bermasalah</strong> yang perlu diperbaiki</li>
             @endif
         </ul>
-        
+
         <p><strong>Rekomendasi:</strong></p>
         <ul>
             @if($ipk < 2.75)
